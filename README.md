@@ -2,7 +2,7 @@
 
 > Efficient streaming find and replace. Buffer based and boundary aware.
 
-__Note:__ This repository is an updated fork (__Node >= 4.2__) from [stream-buffer-replace](https://github.com/neonadventures/stream-buffer-replace).
+__Note:__ This repository is an updated fork (__Node >= 6__) from [stream-buffer-replace](https://github.com/neonadventures/stream-buffer-replace).
 
 ```
 yarn add stream-buffer-replace-up

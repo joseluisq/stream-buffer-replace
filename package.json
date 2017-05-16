@@ -17,7 +17,7 @@
     "buffer"
   ],
   "engines": {
-    "node": ">= 4.2"
+    "node": ">= 6"
   },
   "devDependencies": {
     "stream-buffers": "^3.0.1",
