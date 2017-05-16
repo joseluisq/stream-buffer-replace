@@ -1,61 +1,64 @@
-var assert = require("assert");
-var streamBuffers = require("stream-buffers");
-var replace = require('../index');
+const test = require('tape')
+const buffers = require('stream-buffers')
+const replace = require('../index')
 
-describe('replace', function() {
-  it('replaces a string', function(done) {
-    var input = new streamBuffers.ReadableStreamBuffer();
-    var output = new streamBuffers.WritableStreamBuffer();
-    input
-      .pipe(replace('ipsum', 'REPLACED'))
-      .pipe(output)
-      .on('close', function() {
-        assert.equal(output.getContentsAsString("utf8"), 'Lorem REPLACED dolor sit amet');
-        done();
-      });
-    input.put('Lorem ipsum dolor sit amet');
-    input.destroySoon();
-  });
+test('replaces a string', t => {
+  t.plan(1)
 
-  it('replaces a string multiple times', function(done) {
-    var input = new streamBuffers.ReadableStreamBuffer();
-    var output = new streamBuffers.WritableStreamBuffer();
-    input
-      .pipe(replace('ipsum', 'REPLACED'))
-      .pipe(output)
-      .on('close', function() {
-        assert.equal(output.getContentsAsString("utf8"), 'Lorem REPLACED dolor REPLACED sit amet');
-        done();
-      });
-    input.put('Lorem ipsum dolor ipsum sit amet');
-    input.destroySoon();
-  });
+  const input = new buffers.ReadableStreamBuffer()
+  const output = new buffers.WritableStreamBuffer()
 
-  it('replaces a string on a chunk boundary', function(done) {
-    var input = new streamBuffers.ReadableStreamBuffer({chunkSize: 7});
-    var output = new streamBuffers.WritableStreamBuffer();
-    input
-      .pipe(replace('ipsum', 'REPLACED'))
-      .pipe(output)
-      .on('close', function() {
-        assert.equal(output.getContentsAsString("utf8"), 'Lorem REPLACED dolor REPLACED sit REPLACED');
-        done();
-      });
-    input.put('Lorem ipsum dolor ipsum sit ipsum');
-    input.destroySoon();
-  });
+  input.put('Lorem ipsum dolor sit amet')
+  input.pipe(replace('ipsum', 'REPLACED')).pipe(output).on('finish', () => {
+    t.equal(output.getContentsAsString('utf8'), 'Lorem REPLACED dolor sit amet')
+  })
+  input.stop()
+})
 
-  it('replaces a string when replacement is longer than a single chunk', function(done) {
-    var input = new streamBuffers.ReadableStreamBuffer({chunkSize: 3});
-    var output = new streamBuffers.WritableStreamBuffer();
-    input
-      .pipe(replace('andy', 'nick'))
-      .pipe(output)
-      .on('close', function() {
-        assert.equal(output.getContentsAsString("utf8"), 'hello nick hello nick hello nick');
-        done();
-      });
-    input.put('hello andy hello andy hello andy');
-    input.destroySoon();
-  });
-});
+test('replaces a string multiple times', t => {
+  t.plan(1)
+
+  const input = new buffers.ReadableStreamBuffer()
+  const output = new buffers.WritableStreamBuffer()
+
+  input.pipe(replace('ipsum', 'REPLACED')).pipe(output).on('finish', () => {
+    t.equal(
+      output.getContentsAsString('utf8'),
+      'Lorem REPLACED dolor REPLACED sit amet REPLACED'
+    )
+  })
+  input.put('Lorem ipsum dolor ipsum sit amet ipsum')
+  input.stop()
+})
+
+test('replaces a string on a chunk boundary', t => {
+  t.plan(1)
+
+  const input = new buffers.ReadableStreamBuffer({ chunkSize: 7 })
+  const output = new buffers.WritableStreamBuffer()
+
+  input.pipe(replace('ipsum', 'REPLACED')).pipe(output).on('finish', () => {
+    t.equal(
+      output.getContentsAsString('utf8'),
+      'Lorem REPLACED dolor REPLACED sit REPLACED'
+    )
+  })
+  input.put('Lorem ipsum dolor ipsum sit ipsum')
+  input.stop()
+})
+
+test('replaces a string when replacement is longer than a single chunk', t => {
+  t.plan(1)
+
+  const input = new buffers.ReadableStreamBuffer({ chunkSize: 3 })
+  const output = new buffers.WritableStreamBuffer()
+
+  input.pipe(replace('andy', 'nick')).pipe(output).on('finish', () => {
+    t.equal(
+      output.getContentsAsString('utf8'),
+      'hello nick hello nick hello nick'
+    )
+  })
+  input.put('hello andy hello andy hello andy')
+  input.stop()
+})

@@ -1,23 +1,26 @@
 {
-  "name": "stream-buffer-replace",
-  "version": "1.0.1",
+  "name": "stream-buffer-replace-up",
+  "version": "1.0.0",
   "description": "Efficient streaming find and replace. Buffer based and boundary aware.",
   "main": "index.js",
+  "repository": "joseluisq/stream-buffer-replace-up",
+  "license": "MIT",
   "scripts": {
-    "test": "node_modules/.bin/mocha"
+    "test": "tape test/test.js"
   },
   "author": {
-    "name": "Andy Kent"
+    "name": "José Luis Quintana"
   },
-  "repository": {
-    "url": "git://github.com/neonadventures/stream-buffer-replace.git"
-  },
-  "license": "MIT",
-  "dependencies": {
-    "buffer-indexof": "0.0.2"
+  "keywords": [
+    "stream",
+    "replace",
+    "buffer"
+  ],
+  "engines": {
+    "node": ">= 4.2"
   },
   "devDependencies": {
-    "stream-buffers": "^2.1.0",
-    "mocha": "^2.2.4"
+    "stream-buffers": "^3.0.1",
+    "tape": "^4.6.3"
   }
 }

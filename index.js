@@ -1,56 +1,65 @@
-var util = require('util');
-var stream = require('stream');
-var bindexOf = require('buffer-indexof');
+const Transform = require('stream').Transform
 
-util.inherits(ReplaceStream, stream.Transform);
+class ReplaceStream extends Transform {
+  constructor (matcher, replacement, options) {
+    super(options)
 
-function ReplaceStream(matcher, replacement, options) {
-  this.matcher = new Buffer(matcher);
-  this.replacement = new Buffer(replacement);
-  this.chunksLength = 0;
-  this.chunks = [];
-  stream.Transform.call(this, options);
-}
+    this.matcher = Buffer.from(matcher)
+    this.replacement = Buffer.from(replacement)
+    this.chunksLength = 0
+    this.chunks = []
+    this.counter = 0
+  }
 
-ReplaceStream.prototype._transform = function(chunk, encoding, done) {
-  this.chunks.push(chunk);
-  this.chunksLength += chunk.length;
-  var segment = Buffer.concat(this.chunks, this.chunksLength);
-  remainder = this.pushWithReplacements(segment);
-  this.chunks = [remainder];
-  this.chunksLength = remainder.length;
-  done();
-}
+  _transform (chunk, encoding, done) {
+    this.chunks.push(chunk)
+    this.chunksLength += chunk.length
 
-ReplaceStream.prototype._flush = function(done) {
-  if(this.chunks.length > 0) {
-    this.push(Buffer.concat(this.chunks, this.chunksLength));
-    this.chunks = [];
-    this.chunksLength = 0;
-    done();
+    const segment = Buffer.concat(this.chunks, this.chunksLength)
+    const remainder = this.pushWithReplacements(segment)
+
+    this.chunks = [remainder]
+    this.chunksLength = remainder.length
+
+    done()
+  }
+
+  _flush (done) {
+    if (this.chunks.length > 0) {
+      this.push(Buffer.concat(this.chunks, this.chunksLength))
+      this.chunks = []
+      this.chunksLength = 0
+      done()
+    }
+  }
+
+  pushWithReplacements (src) {
+    const fn = i => {
+      const start = src.indexOf(this.matcher, i)
+
+      if (start === -1) {
+        let remainder = src.slice(i)
+
+        if (remainder.length > this.replacement.length) {
+          this.push(
+            remainder.slice(0, remainder.length - this.replacement.length)
+          )
+          remainder = remainder.slice(
+            remainder.length - this.replacement.length
+          )
+        }
+
+        return remainder
+      }
+
+      this.push(Buffer.concat([src.slice(i, start), this.replacement]))
+
+      return fn(start + this.matcher.length)
+    }
+
+    return fn(0)
   }
 }
 
-ReplaceStream.prototype.pushWithReplacements = function(src, done) {
-  var f = function(i) {
-    var start = bindexOf(src, this.matcher, i);
-    if(start === -1) {
-      var remainder = src.slice(i);
-      if(remainder.length > this.replacement.length) {
-        this.push(remainder.slice(0, remainder.length - this.replacement.length));
-        remainder = remainder.slice(remainder.length - this.replacement.length);
-      }
-      return remainder;
-    }
-    var parts = [];
-    parts.push(src.slice(i, start));
-    parts.push(this.replacement);
-    this.push(Buffer.concat(parts));
-    return f(start + this.matcher.length);
-  }.bind(this);
-  return f(0);
-}
-
-module.exports = function(matcher, replacement, options) {
-  return new ReplaceStream(matcher, replacement, options);
-}
+module.exports = (matcher, replacement, options) =>
+  new ReplaceStream(matcher, replacement, options)

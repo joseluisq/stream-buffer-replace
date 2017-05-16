@@ -1,54 +1,64 @@
-stream-buffer-replace
-=====================
+# stream-buffer-replace-up [![Build Status](https://travis-ci.org/joseluisq/stream-buffer-replace-up.svg?branch=master)](https://travis-ci.org/joseluisq/stream-buffer-replace-up)
 
-Efficient streaming find and replace. Buffer based and boundary aware.
+> Efficient streaming find and replace. Buffer based and boundary aware.
 
-    npm install stream-buffer-replace
+__Note:__ This repository is an updated fork (__Node >= 4.2__) from [stream-buffer-replace](https://github.com/neonadventures/stream-buffer-replace).
 
+```
+yarn add stream-buffer-replace-up
+```
 
-Advantages
-----------
+## Advantages
 
-- never converts Buffers to strings
-- only supports exact matching not patterns / regexs
-- finds matches that span chunk boundaries
-- finds matches that are bigger than a single chunk
+- Never converts Buffers to strings.
+- Only supports exact matching not patterns / regexs.
+- Finds matches that span chunk boundaries.
+- Finds matches that are bigger than a single chunk.
 
+## Usage
 
-Usage
------
+Example using strings:
 
-example using strings...
+```js
+const fs = require('fs')
+const replace = require('stream-buffer-replace-up')
 
-    var fs = require('fs');
-    var replace = require('stream-buffer-replace');
-    fs.writeFileSync('example.txt', "hello world");
+fs.writeFileSync('example.txt', 'hello world')
 
-    var stream = fs.createReadStream('example.txt');
-    stream.pipe( replace('hello', 'goodbye') ).pipe(process.stdout);
+const stream = fs.createReadStream('example.txt')
+stream
+  .pipe(replace('hello', 'goodbye'))
+  .pipe(process.stdout);
 
-    => goodbye world
+// => goodbye world
+```
 
+Example using buffers:
 
-example using buffers...
+```js
+const fs = require('fs');
+const replace = require('stream-buffer-replace-up')
 
-    var fs = require('fs');
-    var replace = require('stream-buffer-replace');
-    fs.writeFileSync('example.txt', "hello world");
+fs.writeFileSync('example.txt', 'hello world')
 
-    var stream = fs.createReadStream('example.txt');
-    var replacer = replace(new buffer('hello'), new Buffer('goodbye'));
-    stream.pipe( replacer ).pipe(process.stdout);
+const stream = fs.createReadStream('example.txt')
+const replacer = replace(Buffer.from('hello'), Buffer.from('goodbye'))
 
-    => goodbye world
+stream
+  .pipe(replace(
+    Buffer.from('hello'),
+    Buffer.from('goodbye')
+  ))
+  .pipe(process.stdout)
 
+// => goodbye world
+```
 
-Tests
------
+## Tests
 
-Are written with Mocha and can be run with...
-
-    npm install
-    npm test
+```
+yarn
+yarn test
+```
 
 Contributions welcome.
